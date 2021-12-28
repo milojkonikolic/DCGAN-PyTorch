@@ -35,15 +35,16 @@ class Trainer():
         self.criterion = nn.BCELoss()
 
     def train(self):
-        real_images_labels = torch.ones((self.batch_size,), device=self.device)
-        generated_images_labels = torch.zeros((self.batch_size,), device=self.device)
         global_step = 0  # Log metrics to tensorboard for every batch
-        log_step = len(self.train_dataloader) / 3  # Display loss on the std output every log_step batches
+        log_step = int(len(self.train_dataloader) / 3)  # Display loss on the std output every log_step batches
         total_batches = len(self.train_dataloader)
         for epoch in range(self.epochs):
             epoch += 1
             pbar = tqdm(self.train_dataloader)
             for real_images in pbar:
+                # Define labels for real and generated images
+                real_images_labels = torch.ones((real_images.shape[0],), device=self.device)
+                generated_images_labels = torch.zeros((real_images.shape[0],), device=self.device)
                 batch = global_step - (epoch-1) * total_batches + 1
                 pbar.set_description(f"epoch: {epoch}/{self.epochs}, batch: {batch}/{total_batches}")
                 real_images = real_images.cuda(self.device)
@@ -55,7 +56,7 @@ class Trainer():
                 discriminator_pred_real = self.discriminator_net(real_images)
                 discriminator_loss_real = self.criterion(discriminator_pred_real, real_images_labels)
                 # Get discriminator loss for generated images from generator network
-                input_noise = torch.randn((self.batch_size, self.input_dim), device=self.device)
+                input_noise = torch.randn((real_images.shape[0], self.input_dim), device=self.device)
                 generated_images = self.generator_net(input_noise)
                 generated_images = generated_images.cuda(self.device)
                 discriminator_pred_generated = self.discriminator_net(generated_images)
@@ -65,7 +66,7 @@ class Trainer():
                 self.d_optimizer.step()
 
                 ###  Generator learning  ###
-                input_noise = torch.randn((self.batch_size, self.input_dim), device=self.device)
+                input_noise = torch.randn((real_images.shape[0], self.input_dim), device=self.device)
                 generated_images = self.generator_net(input_noise)
                 discriminator_pred_generated = self.discriminator_net(generated_images)
                 # Calculate loss for generated images and labels for real images
