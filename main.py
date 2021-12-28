@@ -4,6 +4,7 @@ import yaml
 from tqdm import tqdm
 import torch
 from torch import nn
+from torchvision.utils import make_grid
 
 from utils.utils import get_device, get_logger, get_tb_writer, get_optimizer, get_generator_net, \
     get_discriminator_net, save_model
@@ -84,8 +85,11 @@ class Trainer():
                 global_step += 1
 
                 if global_step % log_step == 0:
-                    self.logger.info(f"Epoch: {epoch}, Batch: {batch}, Generator Loss: {generator_loss.item()} "
+                    self.logger.info(f"Epoch: {epoch}, Batch: {batch}, global step: {global_step}, Generator Loss: {generator_loss.item()} "
                                      f"Discriminator Loss: {discriminator_loss.item()}")
+                    generated_image = self.generator_net(input_noise)
+                    generated_image_grid = make_grid(generated_image)
+                    self.tb_writer.add_image("generated_images", generated_image_grid, global_step)
             # Save models
             save_model(self.generator_net, "generator", epoch, self.checkpints_dir)
             save_model(self.discriminator_net, "discriminator", epoch, self.checkpints_dir)
