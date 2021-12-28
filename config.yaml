@@ -1,0 +1,20 @@
+Data:
+  data_path: "./data.json"
+Generator:
+  learning_rate: 0.0002
+  optimizer: "Adam"
+  pretrained_weights: ""  # Continue training from saved checkpoint
+Discriminator:
+  learning_rate: 0.0002
+  optimizer: "Adam"
+  pretrained_weights: ""  # Continue training from saved checkpoint
+Training:
+  input_dim: 100  # Dimension of the input random vector (noise)
+  channels: 3  # Shape of the output generated image
+  image_size: [64, 64]  # Size of the generated image. Input shape to the discriminator network
+  batch_size: 64
+  epochs: 15
+  device: 0  # GPU id
+Logging:
+  train_logs: "./runs"  # Log directory for tensorboard and checkpoints
+  log_step: 100  # Display loss on the std output every log_step batches
