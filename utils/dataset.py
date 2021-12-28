@@ -8,22 +8,26 @@ from utils.utils import read_data
 
 class DatasetBuilder(Dataset):
 
-    def __init__(self, data_path, img_size):
+    def __init__(self, data_path, img_size, channels=3):
         self.data = read_data(data_path)
         self.img_size = img_size
+        self.channels = channels
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, item):
         img_path = self.data[item]
-        img = self.read_image(img_path)
-        image = self.preprocess_image(img, img_path)
+        image = self.read_image(img_path)
+        image = self.preprocess_image(image, img_path)
         return image
 
     def read_image(self, img_path):
         try:
-            image = cv.imread(img_path)
+            if self.channels == 1:
+                image = cv.imread(img_path, 0)
+            else:
+                image = cv.imread(img_path)
         except:
             image = None
             print(f"ERROR: Can not read image: {img_path}")
@@ -32,17 +36,26 @@ class DatasetBuilder(Dataset):
 
     def preprocess_image(self, image, img_path):
         try:
-            image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-            image = cv.resize(image, tuple(self.img_size))
-            image = np.transpose(image, (2, 0, 1))
+            if self.channels == 3:
+                image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
             image = image / 255.
+            org_height, org_width = image.shape
+            # Pad image if dimensions of the image are smaller than provided image size
+            if org_height < self.img_size[1]:
+                pad_val = (int((self.img_size[1] - org_height) / 2.),
+                           int((self.img_size[0] - org_width) / 2))
+                image = np.pad(image, pad_val)
+            image = cv.resize(image, tuple(self.img_size))
+            if self.channels == 1:
+                image = np.expand_dims(image, 2)
+            image = np.transpose(image, (2, 0, 1))
         except:
             print(f"ERROR: Can not pre-process image: {img_path}")
             exit(1)
         return torch.FloatTensor(image)
 
 
-def create_dataloader(data_path, img_size, batch_size):
-    train_data = DatasetBuilder(data_path, img_size)
+def create_dataloader(data_path, img_size, batch_size, channels=3):
+    train_data = DatasetBuilder(data_path, img_size, channels)
     train_dataloader = DataLoader(dataset=train_data, pin_memory=True, batch_size=batch_size, shuffle=True)
     return train_dataloader

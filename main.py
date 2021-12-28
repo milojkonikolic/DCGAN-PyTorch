@@ -1,6 +1,7 @@
 import os
 import argparse
 import yaml
+from tqdm import tqdm
 import torch
 from torch import nn
 
@@ -22,8 +23,7 @@ class Trainer():
         self.device = get_device(config["Training"]["device"])
         self.tb_writer = get_tb_writer(config["Logging"]["train_logs"])
         self.checkpints_dir = os.path.join(config["Logging"]["train_logs"], "checkpoints")
-        self.log_step = config["Logging"]["log_step"]
-        self.train_dataloader = create_dataloader(self.data, self.image_size, self.batch_size)
+        self.train_dataloader = create_dataloader(self.data, self.image_size, self.batch_size, self.channels)
         self.generator_net = get_generator_net(self.input_dim, self.channels, self.device,
                                                config["Generator"]["pretrained_weights"])
         self.discriminator_net = get_discriminator_net(self.channels, self.device,
@@ -37,12 +37,15 @@ class Trainer():
     def train(self):
         real_images_labels = torch.ones((self.batch_size,), device=self.device)
         generated_images_labels = torch.zeros((self.batch_size,), device=self.device)
-        global_step = 0
-
+        global_step = 0  # Log metrics to tensorboard for every batch
+        log_step = len(self.train_dataloader) / 3  # Display loss on the std output every log_step batches
+        total_batches = len(self.train_dataloader)
         for epoch in range(self.epochs):
             epoch += 1
-            for batch, real_images in enumerate(self.train_dataloader):
-                batch += 1
+            pbar = tqdm(self.train_dataloader)
+            for real_images in pbar:
+                batch = global_step - (epoch-1) * total_batches + 1
+                pbar.set_description(f"epoch: {epoch}/{self.epochs}, batch: {batch}/{total_batches}")
                 real_images = real_images.cuda(self.device)
                 self.d_optimizer.zero_grad()
                 self.g_optimizer.zero_grad()
@@ -79,7 +82,7 @@ class Trainer():
                                           global_step)
                 global_step += 1
 
-                if batch % self.log_step == 0:
+                if global_step % log_step == 0:
                     self.logger.info(f"Epoch: {epoch}, Batch: {batch}, Generator Loss: {generator_loss.item()} "
                                      f"Discriminator Loss: {discriminator_loss.item()}")
             # Save models
