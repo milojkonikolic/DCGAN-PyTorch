@@ -50,11 +50,11 @@ class Trainer():
                 pbar.set_description(f"epoch: {epoch}/{self.epochs}, batch: {batch}/{total_batches}")
                 real_images = real_images.cuda(self.device)
                 self.d_optimizer.zero_grad()
-                self.g_optimizer.zero_grad()
 
                 ###  Discriminator learning  ###
                 # Get discriminator loss for real images from dataset
                 discriminator_pred_real = self.discriminator_net(real_images)
+
                 discriminator_loss_real = self.criterion(discriminator_pred_real, real_images_labels)
                 # Get discriminator loss for generated images from generator network
                 input_noise = torch.randn((real_images.shape[0], self.input_dim), device=self.device)
@@ -67,6 +67,7 @@ class Trainer():
                 self.d_optimizer.step()
 
                 ###  Generator learning  ###
+                self.g_optimizer.zero_grad()
                 input_noise = torch.randn((real_images.shape[0], self.input_dim), device=self.device)
                 generated_images = self.generator_net(input_noise)
                 discriminator_pred_generated = self.discriminator_net(generated_images)
@@ -85,8 +86,13 @@ class Trainer():
                 global_step += 1
 
                 if global_step % log_step == 0:
+                    dis_pred_real = (discriminator_pred_real > 0.5).type(torch.float32)
+                    acc_real = float(torch.mean((dis_pred_real == real_images_labels).type(torch.float32)))
+                    dis_pred_fake = (discriminator_pred_generated > 0.5).type(torch.float32)
+                    acc_fake = float(torch.mean((dis_pred_fake == generated_images_labels).type(torch.float32)))
                     self.logger.info(f"Epoch: {epoch}, Batch: {batch}, global step: {global_step}, Generator Loss: {generator_loss.item()} "
-                                     f"Discriminator Loss: {discriminator_loss.item()}")
+                                     f"Discriminator Loss: {discriminator_loss.item()}, Discriminator Accuracy Real: {acc_real}, "
+                                     f"Discriminator Accuracy Fake: {acc_fake}")
                     generated_image = self.generator_net(input_noise)
                     generated_image_grid = make_grid(generated_image)
                     self.tb_writer.add_image("generated_images", generated_image_grid, global_step)

@@ -35,23 +35,24 @@ class DatasetBuilder(Dataset):
         return image
 
     def preprocess_image(self, image, img_path):
-        try:
-            if self.channels == 3:
-                image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-            image = image / 255.
-            org_height, org_width = image.shape
-            # Pad image if dimensions of the image are smaller than provided image size
-            if org_height < self.img_size[1]:
-                pad_val = (int((self.img_size[1] - org_height) / 2.),
-                           int((self.img_size[0] - org_width) / 2))
-                image = np.pad(image, pad_val)
-            image = cv.resize(image, tuple(self.img_size))
-            if self.channels == 1:
-                image = np.expand_dims(image, 2)
-            image = np.transpose(image, (2, 0, 1))
-        except:
-            print(f"ERROR: Can not pre-process image: {img_path}")
-            exit(1)
+        if self.channels == 3:
+            image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
+        image = image / 128. - 1
+        # Pad image if dimensions of the image are smaller than provided image size
+        if self.channels == 1:
+            image = np.expand_dims(image, 2)
+        org_height, org_width, _ = image.shape
+        if org_height < self.img_size[1]:
+            pad_val = [(int((self.img_size[1] - org_height) / 2.),
+                        int((self.img_size[1] - org_height) / 2.)),
+                       (int((self.img_size[0] - org_width) / 2.),
+                        int((self.img_size[0] - org_width) / 2.)),
+                       (0, 0)]
+            image = np.pad(image, pad_val)
+        image = cv.resize(image, tuple(self.img_size))
+        if self.channels == 1:
+            image = np.expand_dims(image, 2)
+        image = np.transpose(image, (2, 0, 1))
         return torch.FloatTensor(image)
 
 
