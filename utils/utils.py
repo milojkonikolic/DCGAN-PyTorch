@@ -82,6 +82,13 @@ def get_optimizer(model, opt, lr=0.001):
 
 
 def read_weights(model, pretrained_weights):
+    """
+    Args:
+        model: Model
+        pretrained_weights: Pretrained weights to read
+    Returns:
+        Model with pretrained weights
+    """
     print(f"Loading weights from {pretrained_weights}...")
     model.load_state_dict(torch.load(pretrained_weights))
     model.eval()
@@ -89,18 +96,34 @@ def read_weights(model, pretrained_weights):
 
 
 def get_generator_net(input_dim, channels, device, pretrained_weights=''):
-
+    """
+    Args:
+        input_dim: Input dimension to generator net
+        channels: Number of channels of the image (output of the generator net)
+        device: Device id
+        pretrained_weights: Path to pretrained weights if exists
+    Returns:
+        Generator net
+    """
     model = Generator(input_dim, channels)
     if pretrained_weights:
         model = read_weights(model, pretrained_weights)
-    return model.cuda(device)
+    return model.train().cuda(device)
 
 
 def get_discriminator_net(channels, device, pretrained_weights=''):
+    """
+    Args:
+        channels: Number of channels of the input image
+        device: Device id
+        pretrained_weights: Path to pretrained weights if exists
+    Returns:
+        Discriminator net
+    """
     model = Discriminator(channels)
     if pretrained_weights:
         model = read_weights(model, pretrained_weights)
-    return model.cuda(device)
+    return model.train().cuda(device)
 
 
 def save_model(model, model_name, epoch, ckpt_dir):
@@ -116,3 +139,15 @@ def save_model(model, model_name, epoch, ckpt_dir):
     ckpt_path = os.path.join(ckpt_dir, f"{model_name}_epoch_" + str(epoch) + ".pt")
     torch.save(model.state_dict(), ckpt_path)
     print(f"Model saved: {ckpt_path}")
+
+
+def get_random_input_vector(batch_size, input_dim, device):
+    """
+    Args:
+        batch_size: Batch size
+        input_dim: Input dimension of the generator net
+        device: Device id
+    Returns:
+        Gaussian noise - random vector
+    """
+    return torch.randn((batch_size, input_dim), device=device)

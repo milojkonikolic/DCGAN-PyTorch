@@ -1,5 +1,5 @@
 Data:
-  data_path: "./data.json"
+  data_path: "./train.json"
 Generator:
   learning_rate: 0.0002
   optimizer: "Adam"
@@ -9,11 +9,12 @@ Discriminator:
   optimizer: "Adam"
   pretrained_weights: ""  # Continue training from saved checkpoint
 Training:
+  generator_num: 14  # Train generator more frequent than discriminator
   input_dim: 100  # Dimension of the input random vector (noise)
-  channels: 1  # Shape of the output generated image
+  channels: 3  # Shape of the output generated image
   image_size: [64, 64]  # Size of the generated image. Input shape to the discriminator network
-  batch_size: 64
-  epochs: 15
+  batch_size: 128
+  epochs: 30
   device: 0  # GPU id
 Logging:
-  train_logs: "./run1   # Log directory for tensorboard and checkpoints
+  train_logs: "./run1"   # Log directory for tensorboard and checkpoints

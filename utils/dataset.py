@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 
+
 from utils.utils import read_data
 
 
@@ -19,7 +20,7 @@ class DatasetBuilder(Dataset):
     def __getitem__(self, item):
         img_path = self.data[item]
         image = self.read_image(img_path)
-        image = self.preprocess_image(image, img_path)
+        image = self.preprocess_image(image)
         return image
 
     def read_image(self, img_path):
@@ -34,10 +35,10 @@ class DatasetBuilder(Dataset):
             exit(1)
         return image
 
-    def preprocess_image(self, image, img_path):
+    def preprocess_image(self, image):
         if self.channels == 3:
             image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
-        image = image / 128. - 1
+        image = image / 128. - 1.
         # Pad image if dimensions of the image are smaller than provided image size
         if self.channels == 1:
             image = np.expand_dims(image, 2)
@@ -57,6 +58,13 @@ class DatasetBuilder(Dataset):
 
 
 def create_dataloader(data_path, img_size, batch_size, channels=3):
+    """
+    :param data_path: Path to json file with list of images
+    :param img_size: Input size of the image - input to the discriminator net
+    :param batch_size: Batch size
+    :param channels: Number of channels of the input image
+    :return: train_dataloader
+    """
     train_data = DatasetBuilder(data_path, img_size, channels)
     train_dataloader = DataLoader(dataset=train_data, pin_memory=True, batch_size=batch_size, shuffle=True)
     return train_dataloader
