@@ -39,10 +39,10 @@ class DatasetBuilder(Dataset):
         if self.channels == 3:
             image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
         image = image / 128. - 1.
-        # Pad image if dimensions of the image are smaller than provided image size
         if self.channels == 1:
             image = np.expand_dims(image, 2)
         org_height, org_width, _ = image.shape
+        # Pad image if dimensions of the image are smaller than provided image size
         if org_height < self.img_size[1]:
             pad_val = [(int((self.img_size[1] - org_height) / 2.),
                         int((self.img_size[1] - org_height) / 2.)),

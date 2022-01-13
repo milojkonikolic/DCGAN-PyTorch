@@ -38,12 +38,16 @@ class Trainer():
         self.criterion = nn.BCELoss()
 
     def train(self):
+        # Save config for each training in the directory where is checkpoints and tb logs
         config_path = os.path.join(self.config["Logging"]["train_logs"], "config.yaml")
         with open(config_path, 'w') as f:
             yaml.dump(self.config, f)
-        dis_step, gen_step = 0, 0  # Log metrics to tensorboard for every batch for discriminator and generator
+        # Log metrics to tensorboard for every step for discriminator and generator.
+        # Generator net is trained more frequently
+        dis_step, gen_step = 0, 0
         log_step = int(len(self.train_dataloader) / 3)  # Display loss on the std output every log_step batches
         total_batches = len(self.train_dataloader)
+        # Training loop
         for epoch in range(self.epochs):
             epoch += 1
             pbar = tqdm(self.train_dataloader)
@@ -65,10 +69,10 @@ class Trainer():
                 generated_images = self.generator_net(input_noise)
                 discriminator_pred_generated = self.discriminator_net(generated_images)
                 discriminator_loss_generated = self.criterion(discriminator_pred_generated, generated_images_labels)
+                # Discriminator learning
                 discriminator_loss = discriminator_loss_real + discriminator_loss_generated
                 discriminator_loss.backward()
                 self.d_optimizer.step()
-
                 # Log loss and learning rate for discriminator learning
                 dis_step += 1
                 self.tb_writer.add_scalar("Discriminator Loss", discriminator_loss.item(), dis_step)
@@ -85,7 +89,6 @@ class Trainer():
                     generator_loss = self.criterion(discriminator_pred_generated, real_images_labels)
                     generator_loss.backward()
                     self.g_optimizer.step()
-
                     # Log loss and learning rate for generator learning
                     self.tb_writer.add_scalar("Generator Loss", generator_loss.item(), gen_step)
                     self.tb_writer.add_scalar("Generator Learning Rate", self.g_optimizer.param_groups[0]["lr"],

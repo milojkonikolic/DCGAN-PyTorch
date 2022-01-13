@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import numpy as np
+import cv2 as cv
 import torch
 from tensorboardX import SummaryWriter
 
@@ -151,3 +153,15 @@ def get_random_input_vector(batch_size, input_dim, device):
         Gaussian noise - random vector
     """
     return torch.randn((batch_size, input_dim), device=device)
+
+
+def postprocess_generated_image(image):
+    """
+    :param image: Generated image from generator network
+    :return: image: Postprocessed image
+    """
+    image = np.moveaxis(image.detach().to('cpu').numpy()[0], 0, 2)
+    image = image + 1.
+    image = image * 128.
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    return image
