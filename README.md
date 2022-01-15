@@ -27,8 +27,8 @@ All packages are installed using conda environment. More details about conda can
 [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
 ## Data
-Dataset that is used are [CelebA dataset](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html). 
-and [MNIST dataset](http://yann.lecun.com/exdb/mnist/)
+Dataset that is used are [CelebA dataset](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) 
+and [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
 In order to train model data needs to be written in json file as list of paths to images. 
 Example is displayed below.
 ```
@@ -39,13 +39,14 @@ Example is displayed below.
 ]
 ```
 Several images from CelebA dataset is displayed on the images below. 
-The images are created from 25 images from both datasets.
 
 ![Data sample CelebA](./data/celeba_examples/data_sample_celebA.jpg)
 
 Sample from MNIST dataset is displayed below.
 
 ![Data sample MNIST](./data/mnist_examples/data_sample_mnist.jpg)
+
+The images are created from 25 images from both datasets.
 
 ## Training
 To run training run the script ```main.py``` with the argument ```--config``` which is 
