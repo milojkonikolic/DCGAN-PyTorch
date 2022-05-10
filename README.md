@@ -12,7 +12,7 @@ DCGAN is generative model where generator and discriminator are  convolutional n
 The goal of generator is to generate images that looks like real images from dataset.
 
 ## Environment
-Python packages that are used in this implementation is the following:
+Python packages that are used in this implementation are the following:
 ```
 - PyYAML==5.3.1
 - tqdm==4.52.0
@@ -27,10 +27,10 @@ All packages are installed using conda environment. More details about conda can
 [here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
 ## Data
-Dataset that is used are [CelebA dataset](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) 
-and [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
+Datasets that are used are [CelebA dataset](https://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) and [MNIST dataset](http://yann.lecun.com/exdb/mnist/).
 In order to train model data needs to be written in json file as list of paths to images. 
 Example is displayed below.
+
 ```
 [
 "/data/000659.jpg",
@@ -38,7 +38,7 @@ Example is displayed below.
 "/data/200214.jpg"
 ]
 ```
-Several images from CelebA dataset is displayed on the images below. 
+Several images from CelebA dataset are displayed on the image below. 
 
 ![Data sample CelebA](./data/celeba_examples/data_sample_celebA.jpg)
 
@@ -49,9 +49,9 @@ Sample from MNIST dataset is displayed below.
 The images are created from 25 images from both datasets.
 
 ## Training
-To run training run the script ```main.py``` with the argument ```--config``` which is 
-yaml file with parameters. Example of the config file is provided in the repo: ```config.yaml```. 
+To run training run the script ```main.py``` with the argument ```--config``` which is yaml file with parameters of the algorithm. Example of the config file is provided in the repo: ```config.yaml```. 
 The content of the config file is the following:
+
 ```
 Data:
   data_path: "./train.json"  # Path to json file with list of images
@@ -109,7 +109,7 @@ is used to make a grid of images.
 Note that all results are obtained with fixed predefined values for hyperparameters. 
 Hyperparameter search is not done.
 ### CelebA dataset
-Two images below represents discriminator and generator loss during training.
+Two images below represent discriminator and generator loss during training.
 ![Discriminator loss CelebA](./data/celeba_examples/discriminator_loss.png)
 
 ![Generator loss CelebA](./data/celeba_examples/generator_loss.png)
@@ -118,8 +118,7 @@ On the image below is displayed several generated image using generator network 
 
 ![CelebA generated](./data/celeba_examples/generated_celebA.jpg)
 
-The difference between generated images and images form the original dataset is clear. However, taking into account 
-the simplicity of the discriminator and generator models the quality of generated images are expected.
+The difference between generated images and images form the original dataset is clear. However, taking into account the simplicity of the discriminator and generator models the quality of generated images are expected.
 
 ### MNIST dataset
 Loss functions for discriminator and generator models are displayed below.
